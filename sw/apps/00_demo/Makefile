@@ -36,9 +36,9 @@ INC 	:= $(foreach x, $(INC_PATH), $(wildcard $(addprefix $(x)/*,.h*)))
 ALL_SRC := $(SRC) $(ASM)
 OBJ 	:= $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(ALL_SRC)))))
 
-CC 			:= riscv32-unknown-elf-gcc-10.2.0
-OBJCPY 		:= riscv32-unknown-elf-objcopy
-CCFLAGS 	:= -nostdlib -O3 -march=rv32i -T $(LINK_SCRIPT)
+CC 			:= riscv64-unknown-elf-gcc
+OBJCPY 		:= riscv64-unknown-elf-objcopy
+CCFLAGS 	:= -nostdlib -O3 -march=rv32i -mabi=ilp32 -T $(LINK_SCRIPT)
 CCOBJFLAGS	:= $(CCFLAGS) -c 
 PYTHON 		:= python3
 
