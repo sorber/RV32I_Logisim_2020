@@ -1,36 +1,32 @@
+"""Convert a little-endian binary image into 32-bit memory words."""
 
 import argparse
-from asyncore import write
-import binascii
+from pathlib import Path
 
 
-def swap_endianness(w):
-    # let's keep it simple:
-    return w[6]+w[7]+w[4]+w[5]+w[2]+w[3]+w[0]+w[1]
-
-#
-# !! Do _not_ use this for large files
-#
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('img_file', help='Binary image file')
-    parser.add_argument('mem_file', help='ASCII HEX file')
-    parser.add_argument('mem_size_words', help='Number of words to be written')
+    parser.add_argument("img_file", type=Path, help="binary image file")
+    parser.add_argument("mem_file", type=Path, help="output hex file")
+    parser.add_argument("mem_size_words", type=int, help="memory size in 32-bit words")
+    parser.add_argument("--logisim", action="store_true", help="add a Logisim v2.0 raw header")
     args = parser.parse_args()
 
-    hexdata = ""
-    with open(args.img_file, 'rb') as ifile:
-        hexdata = binascii.hexlify(ifile.read()).decode()
-        hexdata = hexdata.rstrip('00')  # hacky remove of EOF
-       
-    word, word_size = len(hexdata), 8
-    words = [ hexdata[i:i+word_size] for i in range(0, word, word_size) ]
-    words_little = [ swap_endianness(w)+'\n' for w in words ]
+    if args.mem_size_words < 0:
+        parser.error("memory size must be non-negative")
+    data = args.img_file.read_bytes()
+    capacity = args.mem_size_words * 4
+    if len(data) > capacity:
+        parser.error(f"image is {len(data)} bytes, but memory holds only {capacity}")
 
-    with open(args.mem_file, 'w') as ofile:
-        ofile.writelines(words_little)
+    data = data.ljust(capacity, b"\0")
+    with args.mem_file.open("w", encoding="ascii") as output:
+        if args.logisim:
+            output.write("v2.0 raw\n")
+        for offset in range(0, capacity, 4):
+            word = int.from_bytes(data[offset:offset + 4], byteorder="little")
+            output.write(f"{word:08x}\n")
 
-        for _ in range(int(args.mem_size_words) - len(words_little)):
-            ofile.write('00000000\n')
 
+if __name__ == "__main__":
+    main()
