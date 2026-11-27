@@ -20,7 +20,7 @@ UTILS_PATH 	= ../../utils
 LINK_SCRIPT = ../../buildenv/linker/smallriscv_logi.ld
 
 SRC 	:= $(foreach x, $(SRC_PATH), $(wildcard $(addprefix $(x)/*,.c*)))
-STU 	:= $(foreach x, $(ASM_PATH), $(wildcard $(addprefix $(x)/*,.S*)))
+STU 	:= $(foreach x, $(ASM_PATH), $(wildcard $(addprefix $(x)/*,.S)))
 ASM 	:= $(STU)
 INC 	:= $(foreach x, $(INC_PATH), $(wildcard $(addprefix $(x)/*,.h*)))
 ALL_SRC := $(SRC) $(ASM)

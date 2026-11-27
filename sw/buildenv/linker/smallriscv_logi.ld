@@ -21,18 +21,24 @@ SECTIONS
         __etext = .;
     } > rom
 
-    .bss (NOLOAD) :
-    {
-        *(.bss*)
-        *(COMMON)
-        __ebss = .;
-    } > ram
-
+    /* Place initialized data at the RAM origin for the flat RAM image. */
     .data :
     {
         *(.rodata*)
         *(.data*)
+        *(.sdata*)
         __edata = .;
+    } > ram
+
+    .bss (NOLOAD) :
+    {
+        . = ALIGN(4);
+        __sbss = .;
+        *(.bss*)
+        *(.sbss*)
+        *(COMMON)
+        . = ALIGN(4);
+        __ebss = .;
     } > ram
 
     .stack (NOLOAD) :
